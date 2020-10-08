@@ -78,7 +78,7 @@ if __name__ == '__main__':
     plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
     plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
     plt.tick_params()
-    plt.savefig("ImageCount.png")
+    plt.savefig("Figures/ImageCount.png")
     
     
     toc = time.perf_counter()

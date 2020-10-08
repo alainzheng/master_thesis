@@ -11,6 +11,29 @@ def create_images(path):
     return slices
 
 
+def create_data():
+    dataDirList = os.listdir('Data/')
+    histoImages = create_images('Data/' + dataDirList[-1]) # create list of HE images
+    
+    groundTruths = []  # create a set of list of maps, groundTruths[dataDirList][imageNumber]
+    for h in range(len(dataDirList)-1):
+        groundTruths.append(create_images('Data/' + dataDirList[h]))
+        
+    masks = []
+    for singleHistoImage in histoImages: #for every image in Train Imgs
+        mask = ['NoGT', 'NoGT', 'NoGT', 'NoGT', 'NoGT', 'NoGT']
+        for expertNumber in range(6): # for every expert
+            # sliceName = singleHistoImage.replace('.jpg', '_classimg_nonconvex.png').replace('Train Imgs', dataDirList[j]) #ex: slide006_core077_classimg_nonconvex.png
+            sliceName = singleHistoImage.replace('.jpg', '').replace('Data/Train Imgs/', '') #ex: slide006_core077
+            # print(sliceName)
+            for gtNumber in range(len(groundTruths[expertNumber])):
+                if sliceName in groundTruths[expertNumber][gtNumber]:
+                    mask[expertNumber] = groundTruths[expertNumber][gtNumber]
+        masks.append(mask)
+    
+    np.save('Datanpy/images.npy', histoImages)
+    np.save('Datanpy/masks.npy', masks)
+    
 def create_train_data():
     dataDirList = os.listdir('Data/')
     histoImages = create_images('Data/' + dataDirList[-1])[:167] # create list of HE images
@@ -31,8 +54,8 @@ def create_train_data():
                     mask[expertNumber] = groundTruths[expertNumber][gtNumber]
         masks.append(mask)
     
-    np.save('Data/trainImages.npy', histoImages)
-    np.save('Data/trainMasks.npy', masks)
+    np.save('Datanpy/trainImages.npy', histoImages)
+    np.save('Datanpy/trainMasks.npy', masks)
     
 def create_test_data():
     
@@ -55,33 +78,33 @@ def create_test_data():
                     mask[expertNumber] = groundTruths[expertNumber][gtNumber]
         masks.append(mask)
     
-    np.save('Data/testImages.npy', histoImages)
-    np.save('Data/testMasks.npy', masks)
+    np.save('Datanpy/testImages.npy', histoImages)
+    np.save('Datanpy/testMasks.npy', masks)
     
 
 
 def load_train_data():
 
-    imgs = np.load('Data/trainImages.npy')
+    imgs = np.load('Datanpy/trainImages.npy')
 
-    masks = np.load('Data/trainMasks.npy')
+    masks = np.load('Datanpy/trainMasks.npy')
 
     return imgs, masks
 
 def load_test_data():
 
-    imgs = np.load('Data/testImages.npy')
+    imgs = np.load('Datanpy/testImages.npy')
 
-    masks = np.load('Data/testMasks.npy')
+    masks = np.load('Datanpy/testMasks.npy')
 
     return imgs, masks
 
 
 def load_data():
 
-    imgs = np.load('Data/images.npy')
+    imgs = np.load('Datanpy/images.npy')
 
-    masks = np.load('Data/masks.npy')
+    masks = np.load('Datanpy/masks.npy')
 
     return imgs, masks
 
@@ -96,6 +119,7 @@ if __name__ == '__main__':
 
     create_train_data()
     create_test_data()
+    create_data()
         
     #imgs, masks = load_data()
     

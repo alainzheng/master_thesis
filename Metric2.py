@@ -46,18 +46,15 @@ def display(nparr):
     the_table.scale(0.8, 1.2)
     ax.axis('off')    
 
-    # Removing ticks and spines enables you to get the figure only with table
-    #plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    #plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
-    #plt.tick_params()
-    plt.text(-0.11, 0.8, str(nparr.replace('.npy', '')), fontsize=13)
-    #plt.title('Expert '+ str(expertNumber), fontsize=36)
-    if not os.path.exists('Scores'):
-            os.makedirs('Scores')
-    plt.savefig('Scores/'+str(nparr.replace('.npy', ''))+'.png')
+    plt.text(-0.11, 0.8, str(nparr.replace('.npy', '').replace('Scores/', '')), fontsize=16)
+    plt.text(0.4, 0.8, 'y_true', fontsize=13)
+    plt.text(-0.11, 0.2, 'y_pred', fontsize=13)
+    
+    # if not os.path.exists('Scores'):
+    #         os.makedirs('Scores')
+    plt.savefig(str(nparr.replace('.npy', ''))+'.png')
 
-def get_score():
-
+def get_scores():
 
     histoImages, masks = load_train_data()
     
@@ -67,62 +64,126 @@ def get_score():
     scores2[:] = np.NaN 
     scores3 = np.empty((6,6))
     scores3[:] = np.NaN
+    
     scores4 = np.empty((6,6))
     scores4[:] = np.NaN 
+    scores5 = np.empty((6,6))
+    scores5[:] = np.NaN 
+    scores6 = np.empty((6,6))
+    scores6[:] = np.NaN 
+    
+    scores7 = np.empty((6,6))
+    scores7[:] = np.NaN 
+    scores8 = np.empty((6,6))
+    scores8[:] = np.NaN 
+    scores9 = np.empty((6,6))
+    scores9[:] = np.NaN 
+    
     for i in range(6):
         for j in range(i+1,6):
             scoreList1 = []
             scoreList2 = []
             scoreList3 = []
+            
             scoreList4 = []
-            maptrue = masks[:,i]
-            mappred = masks[:,j]
-            for k in range(167):
+            scoreList5 = []
+            scoreList6 = []
+            
+            scoreList7 = []
+            scoreList8 = []
+            scoreList9 = []
+            
+            maptrue = masks[:,i] # i is true
+            mappred = masks[:,j] # j is predicted
+            for k in range(1):
                 if maptrue[k]!='NoGT' and mappred[k]!='NoGT':
-                    im1 = io.imread(maptrue[k])
-                    im2 = io.imread(mappred[k])
+                    im1 = io.imread(maptrue[k]).flatten()
+                    im2 = io.imread(mappred[k]).flatten()
+                    lbs = np.unique(im2)
+                    """
                     #get binary maps for metrics
                     # th = 0
                     # im1[im1>th] = 1
                     # im2[im2>th] = 1
                     # im1[im1<=th] = 0
                     # im2[im2<=th] = 0
-                    scoreList1.append(f1_score(im1.flatten(),im2.flatten(), labels=np.unique(im2), average='micro'))
-                    scoreList2.append(jaccard_score(im1.flatten(),im2.flatten(), labels=np.unique(im2), average='micro'))
+                    """
                     
-                    scoreList3.append(f1_score(im1.flatten(),im2.flatten(), labels=np.unique(im2), average='weighted'))
-                    scoreList4.append(jaccard_score(im1.flatten(),im2.flatten(), labels=np.unique(im2), average='weighted'))
+                    scoreList1.append(f1_score(im1,im2, labels=lbs, average='micro'))
+                    scoreList2.append(f1_score(im1,im2, labels=lbs, average='macro'))                    
+                    scoreList3.append(f1_score(im1,im2, labels=lbs, average='weighted'))
+
+
+                    scoreList4.append(jaccard_score(im1,im2, labels=lbs, average='micro'))
+                    scoreList5.append(jaccard_score(im1,im2, labels=lbs, average='macro'))                    
+                    scoreList6.append(jaccard_score(im1,im2, labels=lbs, average='weighted'))
+
+
+                    scoreList7.append(recall_score(im1,im2, labels=lbs, average='micro'))
+                    scoreList8.append(recall_score(im1,im2, labels=lbs, average='macro'))
+                    scoreList9.append(recall_score(im1,im2, labels=lbs, average='weighted'))
+                    
             if scoreList1:
-                scores1[j,i] = sum(scoreList1)/len(scoreList1)
-                    
+                scores1[j,i] = sum(scoreList1)/len(scoreList1)                    
             if scoreList2:
-                scores2[j,i] = sum(scoreList2)/len(scoreList2)
-                
+                scores2[j,i] = sum(scoreList2)/len(scoreList2)                
             if scoreList3:
                 scores3[j,i] = sum(scoreList3)/len(scoreList3)
                     
             if scoreList4:
-                scores4[j,i] = sum(scoreList4)/len(scoreList4)
+                scores4[j,i] = sum(scoreList4)/len(scoreList4)    
+            if scoreList5:
+                scores5[j,i] = sum(scoreList5)/len(scoreList5)    
+            if scoreList6:
+                scores6[j,i] = sum(scoreList6)/len(scoreList6)
+            
+            if scoreList7:
+                scores7[j,i] = sum(scoreList7)/len(scoreList7)
+            if scoreList8:
+                scores8[j,i] = sum(scoreList8)/len(scoreList8)
+            if scoreList9:
+                scores9[j,i] = sum(scoreList9)/len(scoreList9)
+                
+    if not os.path.exists('Scores'):
+        os.makedirs('Scores')
+        
+    np.save('Scores/f1_scores_micro.npy', scores1)
+    np.save('Scores/f1_scores_macro.npy', scores2)
+    np.save('Scores/f1_scores_weighted.npy', scores3)
     
-    np.save('f1_scores_micro.npy', scores1)
-    np.save('jaccard_scores_micro.npy', scores2)
+    np.save('Scores/jaccard_scores_micro.npy', scores4)
+    np.save('Scores/jaccard_scores_macro.npy', scores5)
+    np.save('Scores/jaccard_scores_weighted.npy', scores6)
     
-    np.save('f1_scores_weighted.npy', scores3)
-    np.save('jaccard_scores_weighted.npy', scores4)
+    np.save('Scores/recall_scores_micro.npy', scores7)
+    np.save('Scores/recall_scores_macro.npy', scores8)
+    np.save('Scores/recall_scores_weighted.npy', scores9)
     
 if __name__ == '__main__':
     
     tic = time.perf_counter()
-    nparr = 'jaccard_scores_micro.npy'
+    # nparr = 'Scores/f1_scores_micro.npy'
+    # nparr = 'Scores/f1_scores_weighted.npy'
+    # nparr = 'Scores/jaccard_scores_micro.npy'
+    # nparr = 'Scores/jaccard_scores_weighted.npy'
+    # nparr = 'Scores/recall_scores.npy'
     
-    scores = np.load(nparr)
-
-    for i in range(6):
-        for j in range(i+1,6):
-            scores[j,i] = round(scores[j,i],3) 
-        
-    np.save(nparr,scores)
-    display('jaccard_scores_micro.npy')
+    # display(nparr)
+    
+    get_scores()
+    
+    scores1 = np.load('Scores/f1_scores_micro.npy')
+    scores2 = np.load('Scores/f1_scores_macro.npy')
+    scores3 = np.load('Scores/f1_scores_weighted.npy')
+    
+    scores4 = np.load('Scores/jaccard_scores_micro.npy')
+    scores5 = np.load('Scores/jaccard_scores_macro.npy')
+    scores6 = np.load('Scores/jaccard_scores_weighted.npy')
+    
+    scores7 = np.load('Scores/recall_scores_micro.npy')
+    scores8 = np.load('Scores/recall_scores_macro.npy')
+    scores9 = np.load('Scores/recall_scores_weighted.npy')
+    
     toc = time.perf_counter()
     print('toc-tic: ' + str(datetime.timedelta(seconds = toc-tic)))
     
